@@ -1,0 +1,7 @@
+test_data/
+tmp/
+**/log/*.txt
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+__pycache__/
+docker/compose/volumes/
