@@ -5,33 +5,47 @@ from helpers.common import get_logger
 logger = get_logger(__name__)
 
 class Supplier(Resource):
-    parser = reqparse.RequestParser()
+    get_parser = reqparse.RequestParser()
+    post_parser = reqparse.RequestParser()
+
+    get_parser.add_argument("operator", 
+        type=str,
+        required=False,
+        choices=('and', 'or'),
+        help='Bad choice: {error_msg}',
+        default="and")
+
+    cols = [col.name for col in SupplierModel.__table__.columns]
+    cols.remove('id')
+    for col in cols:
     
-    parser.add_argument('address', 
-        type=str,
-        required=True,
-        help="This field cannot be left blank")
+        get_parser.add_argument(col, 
+            type=str,
+            required=False,
+            store_missing=False)
 
-    parser.add_argument('email', 
-        type=str,
-        required=True,
-        help="This field cannot be left blank")
+        post_parser.add_argument(col, 
+            type=str,
+            required=True,
+            help="This field cannot be left blank")
 
-    def get(self, name):
-        supplier = SupplierModel.find_by(first_only=True, name=name)
-        if supplier:
-            return supplier.json(), 200
+    def get(self):
+        data = Supplier.get_parser.parse_args()
+        supplier_list = SupplierModel.find_by(**data)
+        if supplier_list and len(supplier_list) > 0:
+            return [supplier.json() for supplier in supplier_list], 200
         return {'message': 'Supplier not found'}, 404
 
-    def post(self, name):
-        data = Supplier.parser.parse_args()
+    def post(self):
+        data = Supplier.post_parser.parse_args()
+        name = data.get("name")
 
-        supplier = SupplierModel.find_by(first_only=True, name=name)
+        supplier_list = SupplierModel.find_by(**{"name":name})
 
-        if supplier:
+        if supplier_list and len(supplier_list) > 0:
             return {'message': f'Supplier with name {name} already exists in db'}, 500
         
-        supplier = SupplierModel(name, **data)
+        supplier = SupplierModel(**data)
         attr = supplier.json()
 
         try:
@@ -40,26 +54,32 @@ class Supplier(Resource):
             return {'message': 'An error occurred inserting the supplier'}, 500
         return attr, 201
 
-    def put(self, name):
-        data = Supplier.parser.parse_args()
+    def put(self):
+        data = Supplier.post_parser.parse_args()
+        name = data.get("name")
         
-        supplier = SupplierModel.find_by(first_only=True, name=name)
+        supplier_list = SupplierModel.find_by(**{"name":name})
 
-        if not supplier:    
-            supplier = SupplierModel(name, **data)
+        if not supplier_list or len(supplier_list)==0:    
+            supplier = SupplierModel(**data)
         else:
+            supplier = supplier_list[0]
             supplier.email = data.get('email')
             supplier.address = data.get('address')
+        attr = supplier.json()
         try:
             supplier.save_to_db()
         except:
             return {'message': 'An error occurred inserting the supplier'}, 500
-        return supplier.json(), 201
+        return attr, 201
 
-    def delete(self, name):
-        supplier = SupplierModel.find_by(first_only=True, name=name)
-        if supplier:
-            supplier.delete_from_db()
+    def delete(self):
+        data = Supplier.get_parser.parse_args()
+
+        supplier_list = SupplierModel.find_by(**data)
+        if supplier_list and len(supplier_list) > 0:
+            for supplier in supplier_list:
+                supplier.delete_from_db()
             return { 'message': 'Supplier deleted' } 
         return { 'message': 'Supplier did not exist in db' } 
 

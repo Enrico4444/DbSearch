@@ -45,7 +45,7 @@ def create_tables():
 
 # endpoints
 api.add_resource(Health, '/health')
-api.add_resource(Supplier, '/supplier/<string:name>')
+api.add_resource(Supplier, '/supplier')
 api.add_resource(Suppliers, '/suppliers')
 api.add_resource(Tables, '/tables', '/tables/<string:table_name>')
 api.add_resource(Dataset, '/dataset/<string:table_name>')

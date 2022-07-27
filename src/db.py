@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import column, and_, or_
 # import psycopg2
 import pandas as pd
 
@@ -11,12 +12,28 @@ def bulk_upload(filename, table_name):
     df.to_sql(table_name, db.engine, if_exists='append', index=False)
 
 class DbQuery():
+    
+    @staticmethod
+    def build_query(filters):
+        ops = {
+            "and": and_,
+            "or": or_
+        }
+        operator = ops[filters["operator"]]
+        return operator(
+            *[column(key)==filters[key] for key in filters if key != "operator"]
+        )
+
     @classmethod
-    def find_by(cls, first_only=False, **filters):
-        if first_only:
-            return cls.query.filter_by(**filters).first()
+    def find_by(cls, **filters):
+        if "operator" in filters:
+            return cls.query.filter(
+                DbQuery.build_query(filters)
+            ).all()
         else:
-            return cls.query.filter_by(**filters).all()
+            return cls.query.filter_by(
+                **filters
+            ).all()
 
     @classmethod
     def get_columns(cls):
