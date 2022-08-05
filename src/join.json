@@ -1,0 +1,20 @@
+{
+    "Supplier": {
+        "Item": {
+            "name":"supplier_name"
+        }
+    },
+    "Item": {
+        "Supplier": {
+            "supplier_name":"name"
+        },
+        "Purchase": {
+            "name":"item_name"
+        }
+    },
+    "Purchase": {
+        "Item": {
+            "item_name":"name"
+        }
+    }
+}

@@ -53,6 +53,12 @@ class DbQuery():
         db.session.delete(self)
         db.session.commit()
 
+    def update(self, new_values):
+        cols = self.__table__.columns
+        cols = [col.name for col in cols if col.name in list(new_values.keys())]
+        for col in cols:
+            setattr(self, col, new_values.get(col))
+
 # psycopg2 connection used for bulk upload
 # def bulk_upload(host, user, password, port, filename, table_name, sep=','):
 #     conn = psycopg2.connect(host=host,user=user,password=password,port=port)

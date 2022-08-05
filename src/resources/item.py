@@ -1,10 +1,10 @@
 from flask_restful import Resource, reqparse
-from model.supplier import SupplierModel as Model
+from model.item import ItemModel as Model
 from helpers.common import get_logger
 
 logger = get_logger(__name__)
 
-class Supplier(Resource):
+class Item(Resource):
     get_parser = reqparse.RequestParser()
     post_parser = reqparse.RequestParser()
 
@@ -30,14 +30,14 @@ class Supplier(Resource):
             help="This field cannot be left blank")
 
     def get(self):
-        data = Supplier.get_parser.parse_args()
+        data = Item.get_parser.parse_args()
         obj_list = Model.find_by(**data)
         if obj_list and len(obj_list) > 0:
             return [obj.json() for obj in obj_list], 200
         return {'message': 'Element not found'}, 404
 
     def post(self):
-        data = Supplier.post_parser.parse_args()
+        data = Item.post_parser.parse_args()
         name = data.get("name")
 
         obj_list = Model.find_by(**{"name":name})
@@ -56,7 +56,7 @@ class Supplier(Resource):
         return attr, 201
 
     def put(self):
-        data = Supplier.post_parser.parse_args()
+        data = Item.post_parser.parse_args()
         name = data.get("name")
         
         obj_list = Model.find_by(**{"name":name})
@@ -76,7 +76,7 @@ class Supplier(Resource):
         return attr, 201
 
     def delete(self):
-        data = Supplier.get_parser.parse_args()
+        data = Item.get_parser.parse_args()
 
         obj_list = Model.find_by(**data)
         if obj_list and len(obj_list) > 0:
@@ -85,7 +85,7 @@ class Supplier(Resource):
             return { 'message': 'Element deleted' } 
         return { 'message': 'Element did not exist in db' } 
 
-class Suppliers(Resource):
+class Items(Resource):
 
     def get(self):
         return { 'Elements': [obj.json() for obj in Model.query.all()] }

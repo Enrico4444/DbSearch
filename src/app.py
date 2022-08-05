@@ -8,6 +8,9 @@ from db import db
 
 from resources.health import Health
 from resources.supplier import Supplier, Suppliers
+from resources.item import Item, Items
+from resources.purchase import Purchase, Purchases
+from resources.merged_view import MergedView
 from resources.tables import Tables
 from resources.dataset import Dataset
 
@@ -47,6 +50,11 @@ def create_tables():
 api.add_resource(Health, '/health')
 api.add_resource(Supplier, '/supplier')
 api.add_resource(Suppliers, '/suppliers')
+api.add_resource(Item, '/item')
+api.add_resource(Items, '/items')
+api.add_resource(Purchase, '/purchase')
+api.add_resource(Purchases, '/purchases')
+api.add_resource(MergedView, '/merged_view')
 api.add_resource(Tables, '/tables', '/tables/<string:table_name>')
 api.add_resource(Dataset, '/dataset/<string:table_name>')
 
