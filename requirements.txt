@@ -6,3 +6,4 @@ flask_jwt
 flask_sqlalchemy
 werkzeug
 pandas
+dotenv

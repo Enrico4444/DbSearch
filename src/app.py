@@ -22,23 +22,25 @@ from resources.dataset import Dataset
 from helpers.common import get_conf
 
 # get config based on environment
-env = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("ENV") # Local, Dev, Prod
+# run app as python app.py <env>. Env can be local, dev, prod
+env = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("ENV")
 os.environ["ENV"] = env
+# config is read from src/<ENV>.env file, which is gitignored
 conf = get_conf()
 
 # set logger
-logging.basicConfig(filename = conf.LOG.get("LOGFILE"),
-                    format = conf.LOG.get("FORMAT"),
+logging.basicConfig(filename = conf.get("LOGFILE"),
+                    format = conf.get("FORMAT"),
                     filemode = "w",
                     level = logging.INFO)
 logging.info(f"Running on {env}")
 
 # db
-db_user = conf.DB.get("DB_USER")
-db_pwd = conf.DB.get("DB_PWD")
-db_host = conf.DB.get("DB_HOST")
-db_port = conf.DB.get("DB_PORT")
-db_name = conf.DB.get("DB_NAME")
+db_user = conf.get("DB_USER")
+db_pwd = conf.get("DB_PWD")
+db_host = conf.get("DB_HOST")
+db_port = conf.get("DB_PORT")
+db_name = conf.get("DB_NAME")
 
 # app and api
 app = Flask(__name__)
@@ -46,7 +48,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{db_user}:{db_pwd}@{db_ho
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False # use the sqlalchemy tracker not the flask_sqlalchemy tracker
 app.config['JWT_AUTH_URL_RULE'] = '/login' # change the default JWT /auth endpoint to /login 
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800) # set JWT token to expire within 30 min
-app.secret_key = conf.APP.get("SECRET_KEY")
+app.secret_key = conf.get("SECRET_KEY")
 api = Api(app)
 
 # flask decorator
@@ -73,4 +75,4 @@ api.add_resource(Dataset, '/dataset/<string:table_name>')
 # run once
 if __name__ == "__main__":
   db.init_app(app)
-  app.run(port=conf.APP.get("PORT"), debug=True)
+  app.run(port=conf.get("PORT"), debug=True)
