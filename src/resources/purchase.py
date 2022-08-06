@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
+from flask_jwt_extended import jwt_required
 from model.purchase import PurchaseModel as Model
 from helpers.common import get_logger
 
