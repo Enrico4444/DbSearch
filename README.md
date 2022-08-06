@@ -1,5 +1,11 @@
 # Installation
 
+### environment
+```virtualenv env```
+```env/Scripts/activate```
+```pip install -r requirements.txt```
+**NOTE**: do not use venv, or psycopg2 won't be able to install
+
 ### launch postgres on docker container
 ```docker compose -f docker/compose/docker-compose.yaml up -d```
 

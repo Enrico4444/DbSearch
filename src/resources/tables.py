@@ -1,9 +1,11 @@
 from flask_restful import Resource
+from flask_jwt import jwt_required
 from sqlalchemy import inspect
 from db import db
 
 class Tables(Resource):
 
+  @jwt_required()
   def get(self, table_name=None):
     inspector = inspect(db.engine)
 

@@ -1,11 +1,11 @@
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
-from model.supplier import SupplierModel as Model
+from model.user import UserModel as Model
 from helpers.common import get_logger
 
 logger = get_logger(__name__)
 
-class Supplier(Resource):
+class User(Resource):
     get_parser = reqparse.RequestParser()
     post_parser = reqparse.RequestParser()
 
@@ -17,36 +17,41 @@ class Supplier(Resource):
         default="and")
 
     cols = [col.name for col in Model.__table__.columns]
-    cols.remove('id')
     for col in cols:
-    
-        get_parser.add_argument(col, 
-            type=str,
-            required=False,
-            store_missing=False)
+        
+        # for user:
+        # include 'id' as optional arg to get_parser, as searching by id is required for auth
+        # remove 'password' as it is not possible to search by password
+        if col != 'password':
+            get_parser.add_argument(col, 
+                type=str,
+                required=False,
+                store_missing=False)
 
-        post_parser.add_argument(col, 
-            type=str,
-            required=True,
-            help="This field cannot be left blank")
+        if col != 'id':
+            post_parser.add_argument(col, 
+                type=str,
+                required=True,
+                help="This field cannot be left blank")
 
     @jwt_required()
     def get(self):
-        data = Supplier.get_parser.parse_args()
+        data = User.get_parser.parse_args()
         obj_list = Model.find_by(**data)
         if obj_list and len(obj_list) > 0:
-            return [obj.json() for obj in obj_list], 200
+            # do not return password
+            return [obj.json(exclude=["password"]) for obj in obj_list], 200
         return {'message': 'Element not found'}, 404
 
     @jwt_required()
     def post(self):
-        data = Supplier.post_parser.parse_args()
-        name = data.get("name")
+        data = User.post_parser.parse_args()
+        username = data.get("username")
 
-        obj_list = Model.find_by(**{"name":name})
+        obj_list = Model.find_by(**{"username":username})
 
         if obj_list and len(obj_list) > 0:
-            return {'message': f'Element with name {name} already exists in db'}, 500
+            return {'message': f'Element with username {username} already exists in db'}, 500
         
         obj = Model(**data)
         attr = obj.json()
@@ -60,15 +65,15 @@ class Supplier(Resource):
 
     @jwt_required()
     def put(self):
-        data = Supplier.post_parser.parse_args()
-        name = data.get("name")
+        data = User.post_parser.parse_args()
+        username = data.get("username")
         
-        obj_list = Model.find_by(**{"name":name})
+        obj_list = Model.find_by(**{"username":username})
 
         if not obj_list or len(obj_list)==0:    
             obj = Model(**data)
         else:
-            data.pop("name")
+            data.pop("username")
             obj = obj_list[0]
             obj.update(data)
         attr = obj.json()
@@ -81,7 +86,7 @@ class Supplier(Resource):
 
     @jwt_required()
     def delete(self):
-        data = Supplier.get_parser.parse_args()
+        data = User.get_parser.parse_args()
 
         obj_list = Model.find_by(**data)
         if obj_list and len(obj_list) > 0:
@@ -90,11 +95,12 @@ class Supplier(Resource):
             return { 'message': 'Element deleted' } 
         return { 'message': 'Element did not exist in db' } 
 
-class Suppliers(Resource):
+class Users(Resource):
 
     @jwt_required()
     def get(self):
-        return { 'Elements': [obj.json() for obj in Model.query.all()] }
+        # do not return password
+        return { 'Elements': [obj.json(exclude="password") for obj in Model.query.all()] }
     
     @jwt_required()
     def delete(self):

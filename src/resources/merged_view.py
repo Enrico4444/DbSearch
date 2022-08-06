@@ -1,4 +1,4 @@
-from msilib.schema import tables
+from flask_jwt import jwt_required
 from flask_restful import Resource, reqparse
 from model.supplier import SupplierModel
 from model.merged_view import MergedViewModel
@@ -36,6 +36,7 @@ class MergedView(Resource):
             required=False,
             store_missing=False)
 
+    @jwt_required()
     def get(self):
         data = MergedView.parser.parse_args()
         return MergedViewModel.join(**data)

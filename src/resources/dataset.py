@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse
 from werkzeug.datastructures import FileStorage
+from flask_jwt import jwt_required
 from helpers.dataset import DatasetHelper
 from helpers.common import get_logger
 
@@ -14,6 +15,7 @@ class Dataset(Resource):
         location='files', # NOTE: THIS LINE IS ESSENTIAL and location has to be exactly 'files'
         help="This field cannot be left blank")
 
+    @jwt_required()
     def put(self, table_name):
         data = Dataset.parser.parse_args()
         dataset_file = data.get("dataset_file")

@@ -4,7 +4,8 @@ class Local:
         "FORMAT": "%(asctime)s %(message)s"
     }
     APP = {
-        "PORT": 5001
+        "PORT": 5001,
+        "SECRET_KEY": "enrico"
     }
     DB = {
         "DB_USER": "postgres_user",

@@ -2,4 +2,7 @@ psycopg2-binary # necessary for sqlalchemy
 sqlalchemy
 flask
 flask_restful
+flask_jwt
+flask_sqlalchemy
 werkzeug
+pandas

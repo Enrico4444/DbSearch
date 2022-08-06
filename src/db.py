@@ -39,10 +39,10 @@ class DbQuery():
     def get_columns(cls):
         return [col.name for col in cls.__table__.columns]
 
-    def json(self):
+    def json(self, exclude=[]):
         cols = self.__table__.columns # accessing __table__ property of cls through __class__
         colnames = [col.name for col in cols]
-        return { col: self.__dict__[col] for col in colnames if col in self.__dict__ }
+        return { col: self.__dict__[col] for col in colnames if col in self.__dict__ and col not in exclude}
 
     # upsert 
     def save_to_db(self): 
