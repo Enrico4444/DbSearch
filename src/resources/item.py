@@ -79,7 +79,7 @@ class Item(Resource):
             return {'message': 'An error occurred inserting the element'}, 500
         return attr, 201
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     def delete(self):
         data = Item.get_parser.parse_args()
 
@@ -96,7 +96,7 @@ class Items(Resource):
     def get(self):
         return { 'Elements': [obj.json() for obj in Model.query.all()] }
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     def delete(self):
         # TODO: find if exists delete all
         for obj in Model.query.all():

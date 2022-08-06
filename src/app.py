@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+from tokenize import Token
 from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
@@ -14,7 +15,7 @@ from resources.health import Health
 from resources.supplier import Supplier, Suppliers
 from resources.item import Item, Items
 from resources.purchase import Purchase, Purchases
-from resources.user import User, Users, UserLogin, UserLogout
+from resources.user import User, Users, UserLogin, UserLogout, TokenRefresh
 from resources.merged_view import MergedView
 from resources.tables import Tables
 from resources.dataset import Dataset
@@ -75,6 +76,7 @@ api.add_resource(Tables, '/tables', '/tables/<string:table_name>')
 api.add_resource(Dataset, '/dataset/<string:table_name>')
 api.add_resource(UserLogin, '/login')
 api.add_resource(UserLogout, '/logout')
+api.add_resource(TokenRefresh, '/refresh')
 
 # run once
 if __name__ == "__main__":

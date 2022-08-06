@@ -3,7 +3,8 @@ from flask_jwt_extended import (
     jwt_required,
     create_access_token,
     create_refresh_token,
-    get_jwt
+    get_jwt,
+    get_jwt_identity
 )
 from model.user import UserModel as Model
 from helpers.common import get_logger
@@ -92,7 +93,7 @@ class User(Resource):
             return {'message': 'An error occurred inserting the element'}, 500
         return attr, 201
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     def delete(self):
         data = get_parser.parse_args()
 
@@ -111,7 +112,7 @@ class Users(Resource):
         # do not return password
         return { 'Elements': [obj.json(exclude="password") for obj in Model.query.all()] }
     
-    @jwt_required()
+    @jwt_required(fresh=True)
     def delete(self):
         # TODO: find if exists delete all
         for obj in Model.query.all():
@@ -139,3 +140,18 @@ class UserLogout(Resource):
         jti = get_jwt()["jti"]  # jti is "JWT ID", a unique identifier for a JWT.
         BLACKLIST.add(jti)
         return {"message": "Successfully logged out"}, 200     
+
+class TokenRefresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        """
+        Get a new access token without requiring username and password—only the 'refresh token'
+        provided in the /login endpoint.
+
+        Note that refreshed access tokens have a `fresh=False`, which means that the user may have not
+        given us their username and password for potentially a long time (if the token has been
+        refreshed many times over).
+        """
+        user = get_jwt_identity()
+        new_token = create_access_token(identity=user, fresh=False)
+        return {"access_token": new_token}, 200
