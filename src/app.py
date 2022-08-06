@@ -14,7 +14,7 @@ from resources.health import Health
 from resources.supplier import Supplier, Suppliers
 from resources.item import Item, Items
 from resources.purchase import Purchase, Purchases
-from resources.user import User, Users, UserLogin
+from resources.user import User, Users, UserLogin, UserLogout
 from resources.merged_view import MergedView
 from resources.tables import Tables
 from resources.dataset import Dataset
@@ -74,6 +74,7 @@ api.add_resource(MergedView, '/merged_view')
 api.add_resource(Tables, '/tables', '/tables/<string:table_name>')
 api.add_resource(Dataset, '/dataset/<string:table_name>')
 api.add_resource(UserLogin, '/login')
+api.add_resource(UserLogout, '/logout')
 
 # run once
 if __name__ == "__main__":

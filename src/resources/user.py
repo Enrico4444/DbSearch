@@ -2,10 +2,12 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import (
     jwt_required,
     create_access_token,
-    create_refresh_token
+    create_refresh_token,
+    get_jwt
 )
 from model.user import UserModel as Model
 from helpers.common import get_logger
+from blacklist import BLACKLIST
 
 logger = get_logger(__name__)
 
@@ -131,4 +133,9 @@ class UserLogin(Resource):
             refresh_token = create_refresh_token(user.id)
             return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
-        
+class UserLogout(Resource):
+    @jwt_required()
+    def post(self):
+        jti = get_jwt()["jti"]  # jti is "JWT ID", a unique identifier for a JWT.
+        BLACKLIST.add(jti)
+        return {"message": "Successfully logged out"}, 200     
