@@ -16,5 +16,15 @@
         "Item": {
             "item_name":"name"
         }
+    },
+    "User": {
+        "Role": {
+            "role_id":"id"
+        }
+    },
+    "Role": {
+        "User": {
+            "id":"role_id"
+        }
     }
 }

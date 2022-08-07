@@ -7,13 +7,15 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 from model.user import UserModel as Model
+from model.role import RoleModel as Role
 from helpers.common import get_logger
-from blacklist import BLACKLIST
+from rsc.blacklist import BLACKLIST
 
 logger = get_logger(__name__)
 
 get_parser = reqparse.RequestParser()
 post_parser = reqparse.RequestParser()
+login_parser = reqparse.RequestParser()
 
 get_parser.add_argument("operator", 
     type=str,
@@ -23,10 +25,10 @@ get_parser.add_argument("operator",
     default="and")
 
 cols = [col.name for col in Model.__table__.columns]
+cols.remove('id')
 for col in cols:
     
     # for user:
-    # include 'id' as optional arg to get_parser, as searching by id is required for auth
     # remove 'password' as it is not possible to search by password
     if col != 'password':
         get_parser.add_argument(col, 
@@ -34,13 +36,29 @@ for col in cols:
             required=False,
             store_missing=False)
 
-    if col != 'id':
+    if col != 'role_id': # role_id not required when adding new user
+        login_parser.add_argument(col, 
+            type=str,
+            required=True,
+            help="This field cannot be left blank")
         post_parser.add_argument(col, 
             type=str,
             required=True,
             help="This field cannot be left blank")
 
+    # let user optionally input role name; app will find id; role_name is not required, default role will be input
+    post_parser.add_argument("role_name", 
+        type=str,
+        required=False,
+        default="basic")
+
 class User(Resource):
+
+    @staticmethod
+    def get_role_id_from_name(role_name):
+        role = Role.find_by(name=role_name)
+        if role:
+            return role[0].id
 
     @jwt_required()
     def get(self):
@@ -56,6 +74,13 @@ class User(Resource):
     def post(self):
         data = post_parser.parse_args()
         username = data.get("username")
+        role_name = data.get("role_name")
+        role_id = self.get_role_id_from_name(role_name)
+        if not role_id:
+            return {'message': f'{role_name} is not a valid role_name'}, 400
+
+        data.pop("role_name")
+        data["role_id"] = role_id
 
         obj_list = Model.find_by(**{"username":username})
 
@@ -76,6 +101,13 @@ class User(Resource):
     def put(self):
         data = post_parser.parse_args()
         username = data.get("username")
+        role_name = data.get("role_name")
+        role_id = self.get_role_id_from_name(role_name)
+        if not role_id:
+            return {'message': f'{role_name} is not a valid role_name'}, 400
+
+        data.pop("role_name")
+        data["role_id"] = role_id
         
         obj_list = Model.find_by(**{"username":username})
 
@@ -121,7 +153,7 @@ class Users(Resource):
 
 class UserLogin(Resource):
     def post(self):
-        data = post_parser.parse_args()
+        data = login_parser.parse_args()
 
         user = Model.find_by(**data)
 

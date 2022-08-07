@@ -1,7 +1,6 @@
 import os
 import sys
 import logging
-from tokenize import Token
 from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
@@ -9,7 +8,7 @@ from datetime import timedelta
 
 from db import db
 
-from blacklist import BLACKLIST
+from rsc.blacklist import BLACKLIST
 
 from resources.health import Health
 from resources.supplier import Supplier, Suppliers
@@ -19,8 +18,10 @@ from resources.user import User, Users, UserLogin, UserLogout, TokenRefresh
 from resources.merged_view import MergedView
 from resources.tables import Tables
 from resources.dataset import Dataset
+from resources.role import Role, Roles
 
 from helpers.common import get_conf
+from helpers.user_role_management import create_role_and_user
 
 # get config based on environment
 # run app as python app.py <env>. Env can be local, dev, prod
@@ -59,7 +60,31 @@ api = Api(app)
 def create_tables():
   db.create_all()
 
+@app.before_first_request
+def create_initial_role_and_user():
+  admin_permissions = {"all":["get","put","post","delete"]}
+  # creates admin role and admin user
+  create_role_and_user(
+    role_name='admin', 
+    permissions=admin_permissions,
+    username='admin', 
+    password=conf.get('ADMIN_PASSWORD')
+  )
+
+  basic_permissions = {"all":["get","put","post","delete"]} # basic are same as admin for testing purposed
+  # creates basic default role without user
+  create_role_and_user(
+    role_name='basic', 
+    permissions=basic_permissions
+  )
+
 jwt = JWTManager(app)
+
+# @jwt.user_claims_loader
+# def add_claims_to_jwt(identity): 
+#     if identity == 1: 
+#         return {'is_admin': True}
+#     return {'is_admin': False}
 
 # endpoints
 api.add_resource(Health, '/health')
@@ -77,6 +102,8 @@ api.add_resource(Dataset, '/dataset/<string:table_name>')
 api.add_resource(UserLogin, '/login')
 api.add_resource(UserLogout, '/logout')
 api.add_resource(TokenRefresh, '/refresh')
+api.add_resource(Role, '/role')
+api.add_resource(Roles, '/roles')
 
 # run once
 if __name__ == "__main__":

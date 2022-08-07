@@ -4,18 +4,19 @@ from db import db
 from model.item import ItemModel as Item
 from model.supplier import SupplierModel as Supplier
 from model.purchase import PurchaseModel as Purchase
+from model.role import RoleModel as Role
+from model.user import UserModel as User
 from helpers.common import get_logger
 
 logger = get_logger(__name__)
 
-with open("join.json","r") as f:
+with open("rsc/join.json","r") as f:
     conf = json.load(f)
 
 class MergedViewModel():
 
     @staticmethod
     def _join(filters, tables):
-
         tbls = tables.copy()
 
         session = Session(db.engine)
