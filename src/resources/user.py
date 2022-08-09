@@ -1,3 +1,4 @@
+from webbrowser import get
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import (
     jwt_required,
@@ -8,10 +9,12 @@ from flask_jwt_extended import (
 )
 from model.user import UserModel as Model
 from model.role import RoleModel as Role
-from helpers.common import get_logger
-from rsc.blacklist import BLACKLIST
+from helpers.common import get_logger, get_conf
+from helpers.object_storage import ObjectStorage
 
 logger = get_logger(__name__)
+
+conf = get_conf()
 
 get_parser = reqparse.RequestParser()
 post_parser = reqparse.RequestParser()
@@ -169,10 +172,16 @@ class UserLogin(Resource):
 class UserLogout(Resource):
     @jwt_required()
     def post(self):
+        storage = ObjectStorage()
+        BLACKLIST = storage.get_json(conf.get("STORAGE_BLACKLIST_PATH"))
         jti = get_jwt()["jti"]  # jti is "JWT ID", a unique identifier for a JWT.
-        BLACKLIST.add(jti)
-        return {"message": "Successfully logged out"}, 200     
-
+        if jti not in BLACKLIST:
+            logger.info("adding jti to blacklist")
+            BLACKLIST.append(jti)
+            storage.put_json(BLACKLIST, conf.get("STORAGE_BLACKLIST_PATH"))
+            return {"message": "Successfully logged out"}, 200 
+        logger.info("jti already in blacklist")
+        
 class TokenRefresh(Resource):
     @jwt_required(refresh=True)
     def post(self):

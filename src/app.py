@@ -8,8 +8,6 @@ from datetime import timedelta
 
 from db import db
 
-from rsc.blacklist import BLACKLIST
-
 from resources.health import Health
 from resources.supplier import Supplier, Suppliers
 from resources.item import Item, Items
@@ -20,8 +18,9 @@ from resources.tables import Tables
 from resources.dataset import Dataset
 from resources.role import Role, Roles
 
-from helpers.common import get_conf
+from helpers.common import get_conf, get_logger
 from helpers.user_role_management import create_role_and_user
+from helpers.object_storage import ObjectStorage
 
 # get config based on environment
 # run app as python app.py <env>. Env can be local, dev, prod
@@ -31,11 +30,7 @@ os.environ["ENV"] = env
 conf = get_conf()
 
 # set logger
-logging.basicConfig(filename = conf.get("LOGFILE"),
-                    format = conf.get("FORMAT"),
-                    filemode = "w",
-                    level = logging.INFO)
-logging.info(f"Running on {env}")
+logger = get_logger(__name__)
 
 # db
 db_user = conf.get("DB_USER")
@@ -59,6 +54,21 @@ api = Api(app)
 @app.before_first_request
 def create_tables():
   db.create_all()
+
+@app.before_first_request
+def create_rsc():
+  rsc = {
+    conf.get('STORAGE_PERMISSIONS_PATH'): {}, 
+    conf.get('STORAGE_BLACKLIST_PATH'): []
+  }
+  client = ObjectStorage()
+  for r in rsc:
+    try:
+      client.get_json(r)
+      logger.info(f"Resource {r} already exists")
+    except FileNotFoundError:
+      logger.info(f"Putting resource {r}")
+      client.put_json(object=rsc[r], key=r)
 
 @app.before_first_request
 def create_initial_role_and_user():
