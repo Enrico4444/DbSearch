@@ -7,6 +7,7 @@ from model.purchase import PurchaseModel
 from model.role import RoleModel
 from model.user import UserModel
 from helpers.common import get_logger
+from helpers.user_role_management import role_has_permissions
 
 logger = get_logger(__name__)
 
@@ -31,8 +32,6 @@ class MergedView(Resource):
            [f"purchase.{col.name}" for col in PurchaseModel.__table__.columns] +\
            [f"role.{col.name}" for col in RoleModel.__table__.columns] +\
            [f"user.{col.name}" for col in UserModel.__table__.columns]
-    while "id" in cols:
-        cols.remove('id')
     
     for col in cols:
         parser.add_argument(col, 
@@ -42,7 +41,9 @@ class MergedView(Resource):
 
     @jwt_required()
     def get(self):
-        data = MergedView.parser.parse_args()
+        if not role_has_permissions('merged_view'):
+            return { 'message': 'User does not have permissions to perform this request' }
+        data = MergedView.parser.parse_args(strict=True) # abort if wrong arguments
         return MergedViewModel.join(**data)
 
 

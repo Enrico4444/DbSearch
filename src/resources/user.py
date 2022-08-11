@@ -1,4 +1,3 @@
-from webbrowser import get
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import (
     jwt_required,
@@ -11,6 +10,7 @@ from model.user import UserModel as Model
 from model.role import RoleModel as Role
 from helpers.common import get_logger, get_conf
 from helpers.object_storage import ObjectStorage
+from helpers.user_role_management import get_permissions, role_has_permissions
 
 logger = get_logger(__name__)
 
@@ -66,6 +66,8 @@ class User(Resource):
     @jwt_required()
     def get(self):
         # NOTE: only for testing purpose. To be deleted
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = get_parser.parse_args()
         obj_list = Model.find_by(**data)
         if obj_list and len(obj_list) > 0:
@@ -75,6 +77,8 @@ class User(Resource):
 
     @jwt_required()
     def post(self):
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = post_parser.parse_args()
         username = data.get("username")
         role_name = data.get("role_name")
@@ -102,6 +106,8 @@ class User(Resource):
 
     @jwt_required()
     def put(self):
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = post_parser.parse_args()
         username = data.get("username")
         role_name = data.get("role_name")
@@ -130,6 +136,8 @@ class User(Resource):
 
     @jwt_required(fresh=True)
     def delete(self):
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = get_parser.parse_args()
 
         obj_list = Model.find_by(**data)
@@ -145,11 +153,16 @@ class Users(Resource):
     def get(self):
         # NOTE: only for testing purpose. To be deleted
         # do not return password
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         return { 'Elements': [obj.json(exclude="password") for obj in Model.query.all()] }
+        
     
     @jwt_required(fresh=True)
     def delete(self):
         # TODO: find if exists delete all
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         for obj in Model.query.all():
             obj.delete_from_db()
         return { 'message': 'Elements deleted from db' }
@@ -164,8 +177,12 @@ class UserLogin(Resource):
         if not user:
             return {"message": "Invalid Credentials!"}, 401
         user = user[0]
+
+        # get permissions as additional claim
+        permissions = {'permissions': get_permissions(user.id)}
+
         if user.password == data["password"]:
-            access_token = create_access_token(identity=user.id, fresh=True)
+            access_token = create_access_token(identity=user.id, fresh=True, additional_claims=permissions)
             refresh_token = create_refresh_token(user.id)
             return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
@@ -194,5 +211,7 @@ class TokenRefresh(Resource):
         refreshed many times over).
         """
         user = get_jwt_identity()
-        new_token = create_access_token(identity=user, fresh=False)
+        # get permissions as additional claim
+        permissions = {'permissions': get_permissions(user)}
+        new_token = create_access_token(identity=user, fresh=False, additional_claims=permissions)
         return {"access_token": new_token}, 200

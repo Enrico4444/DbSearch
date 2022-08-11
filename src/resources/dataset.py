@@ -3,6 +3,7 @@ from werkzeug.datastructures import FileStorage
 from flask_jwt_extended import jwt_required
 from helpers.dataset import DatasetHelper
 from helpers.common import get_logger
+from helpers.user_role_management import role_has_permissions
 
 logger = get_logger(__name__)
 
@@ -17,6 +18,8 @@ class Dataset(Resource):
 
     @jwt_required()
     def put(self, table_name):
+        if not role_has_permissions('dataset'):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = Dataset.parser.parse_args()
         dataset_file = data.get("dataset_file")
         try:

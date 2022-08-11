@@ -3,7 +3,7 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 from model.role import RoleModel as Model
 from helpers.common import get_logger
-from helpers.user_role_management import assign_permissions
+from helpers.user_role_management import assign_permissions, role_has_permissions
 
 logger = get_logger(__name__)
 
@@ -59,6 +59,8 @@ class Role(Resource):
 
     @jwt_required()
     def get(self):
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = Role.get_parser.parse_args()
         obj_list = Model.find_by(**data)
         if obj_list and len(obj_list) > 0:
@@ -67,6 +69,8 @@ class Role(Resource):
 
     @jwt_required()
     def post(self):
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = Role.post_parser.parse_args()
         # separate columns from permission information
         permissions = data["permissions"]
@@ -100,6 +104,8 @@ class Role(Resource):
 
     @jwt_required()
     def put(self):
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = Role.post_parser.parse_args()
         # separate columns from permission information
         permissions = data["permissions"]
@@ -134,6 +140,8 @@ class Role(Resource):
 
     @jwt_required(fresh=True)
     def delete(self):
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         data = Role.get_parser.parse_args()
 
         obj_list = Model.find_by(**data)
@@ -147,11 +155,15 @@ class Roles(Resource):
 
     @jwt_required()
     def get(self):
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         return { 'Elements': [obj.json() for obj in Model.query.all()] }
     
     @jwt_required(fresh=True)
     def delete(self):
         # TODO: find if exists delete all
+        if not role_has_permissions(Model.__tablename__):
+            return { 'message': 'User does not have permissions to perform this request' }
         for obj in Model.query.all():
             obj.delete_from_db()
         return { 'message': 'Elements deleted from db' }

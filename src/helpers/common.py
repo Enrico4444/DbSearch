@@ -11,9 +11,10 @@ def get_conf():
 def get_logger(current_filename):
     conf = get_conf()
     logger = logging.getLogger(current_filename)
+    logger.root.setLevel(logging.NOTSET)    
 
     handler = logging.FileHandler(filename=conf.get("LOGFILE"))
-    handler.setLevel(logging.INFO)
+    # handler.setLevel(logging.DEBUG)
     
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)

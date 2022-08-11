@@ -1,7 +1,12 @@
+import inspect
+from flask_jwt_extended import get_jwt
 from model.user import UserModel
 from model.role import RoleModel
+from model.merged_view import MergedViewModel
 from helpers.object_storage import ObjectStorage
-from helpers.common import get_conf
+from helpers.common import get_conf, get_logger
+
+logger = get_logger(__name__)
 
 conf = get_conf()
 
@@ -37,3 +42,26 @@ def create_role_and_user(role_name, permissions, username=None, password=None):
             user = UserModel(username=username, password=password, role_id=role.id)
             user.save_to_db()
 
+def get_permissions(user_id):
+    filters = {
+        "user.id":user_id,
+        "return":["user","role"]
+    }
+    user_data = MergedViewModel.join(**filters)
+    if user_data and "role.name" in user_data[0]:
+        role_name = user_data[0]["role.name"]
+        storage = ObjectStorage()
+        PERMISSIONS = storage.get_json(conf.get("STORAGE_PERMISSIONS_PATH"))
+        if role_name in PERMISSIONS:
+            return PERMISSIONS[role_name]
+
+def role_has_permissions(element):
+    method = inspect.stack()[1].function # name of the caller function, corresponding with the HTTP verb (method)
+    claims = get_jwt()
+    if claims and 'permissions' in claims:
+        permissions = claims['permissions']
+        if 'all' in permissions and method in permissions['all']:
+            return True
+        if element in permissions and method in permissions[element]:
+            return True
+    return False

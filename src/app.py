@@ -90,12 +90,6 @@ def create_initial_role_and_user():
 
 jwt = JWTManager(app)
 
-# @jwt.user_claims_loader
-# def add_claims_to_jwt(identity): 
-#     if identity == 1: 
-#         return {'is_admin': True}
-#     return {'is_admin': False}
-
 # endpoints
 api.add_resource(Health, '/health')
 api.add_resource(Supplier, '/supplier')
