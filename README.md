@@ -1,10 +1,10 @@
 # Installation
 
 ### environment
-```virtualenv env```
-```env/Scripts/activate```
-```pip install -r requirements.txt```
-**NOTE**: do not use venv, or psycopg2 won't be able to install
+```virtualenv api/env```
+```api/env/Scripts/activate```
+```pip install -r api/requirements.txt```
+**NOTE**: do not use venv, or psycopg2 won"t be able to install
 
 ### launch postgres on docker container
 ```docker compose -f docker/compose/docker-compose.yaml up -d```
@@ -30,10 +30,7 @@ https://www.microfocus.com/documentation/idol/IDOL_12_0/MediaServer/Guides/html/
 ```SELECT * FROM supplier;``` !!! ricorda ";" 
 
 ### RUN
-cd docker/compose  
-docker compose up -d  
-cd ../../src  
-python app.py Local  
+./setup.sh 
 
 ### App Design
 # Insert from UI
