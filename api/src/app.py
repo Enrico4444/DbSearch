@@ -1,6 +1,5 @@
 import os
 import sys
-import logging
 from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
@@ -26,7 +25,6 @@ from helpers.object_storage import ObjectStorage
 # run app as python app.py <env>. Env can be local, dev, prod
 envs = ["local","dev","prod"]
 os.environ["ENVIRON"] = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in envs else os.environ.get("ENVIRON","local")
-
 # config is read from src/<ENV>.env file, which is gitignored
 conf = get_conf()
 
@@ -36,8 +34,8 @@ logger = get_logger(__name__)
 # db
 db_user = conf.get("DB_USER")
 db_pwd = conf.get("DB_PWD")
-db_host = conf.get("DB_HOST")
-db_port = conf.get("DB_PORT")
+db_host = conf.get("DB_LOCAL_HOST")
+db_port = conf.get("DB_LOCAL_PORT")
 db_name = conf.get("DB_NAME")
 
 # app and api
@@ -112,7 +110,6 @@ api.add_resource(Roles, "/roles")
 
 db.init_app(app)
 
-# run once
 if __name__ == "__main__":
   # NOTE: host=0.0.0.0 instead of 127.0.0.1 important for reaching app running on container from localhost
-  app.run(host=conf.get("HOST"), port=conf.get("PORT"), debug=True)
+  app.run(host=conf.get("API_LOCAL_HOST"), port=conf.get("API_LOCAL_PORT"), debug=True)

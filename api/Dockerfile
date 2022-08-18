@@ -13,5 +13,7 @@ COPY . /
 # set working directory inside the container
 WORKDIR /src 
 
-# overwrite if you want to run the app with uwsgi
-CMD ["python", "app.py", "dev"]
+# overwrite with "python app.py dev" if you want to run the app with uwsgi
+CMD ["uwsgi", "app.ini"]
+# CMD ["uwsgi", "--socket", "0.0.0.0:8080", "--protocol=http", "-w", "app:app"]
+# CMD ["python", "app.py", "dev"]

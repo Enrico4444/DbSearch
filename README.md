@@ -32,6 +32,10 @@ https://www.microfocus.com/documentation/idol/IDOL_12_0/MediaServer/Guides/html/
 ### RUN
 ./setup.sh 
 
+### NGINX LOGS
+https://stackoverflow.com/questions/30269672/unable-to-use-lt-when-running-nginx-docker-or-cat-logs
+if Internal Server Error, check logs from app (docker logs app_container_name)
+
 ### App Design
 # Insert from UI
 - choose table: suppliers, items, purchases

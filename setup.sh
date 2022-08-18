@@ -1,1 +1,1 @@
-docker compose -f compose/docker-compose.yaml up -d
+docker compose -f compose/docker-compose.yaml up -d -e ENVIRON=dev

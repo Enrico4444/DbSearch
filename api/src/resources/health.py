@@ -4,7 +4,7 @@ from test import temp_test
 class Health(Resource):
 
   def get(self):
-    return {"message": "Api OK"}, 200
+    return {"message": "Api is OK"}, 200
 
   def post(self):
     return {"test result": temp_test()}, 200

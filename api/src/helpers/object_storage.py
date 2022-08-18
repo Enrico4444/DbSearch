@@ -46,7 +46,7 @@ class ObjectStorage():
             "access_key": conf.get("STORAGE_ACCESS_KEY"),
             "secret_key": conf.get("STORAGE_SECRET_KEY")
         }
-        storage_url = f'{conf.get("STORAGE_HOST")}:{conf.get("STORAGE_PORT")}'
+        storage_url = f'{conf.get("STORAGE_LOCAL_HOST")}:{conf.get("STORAGE_LOCAL_PORT")}'
         try:
             minio = Minio(
                 storage_url,

@@ -20,10 +20,10 @@ class DatasetHelper():
         )
         # upload to db
         # bulk_upload(
-        #     host=conf.get("DB_HOST"), 
+        #     host=conf.get("DB_LOCAL_HOST"), 
         #     user=conf.get("DB_USER"), 
         #     password=conf.get("DB_PWD"), 
-        #     port=conf.get("DB_PORT"), 
+        #     port=conf.get("DB_LOCAL_PORT"), 
         #     filename=out_path, 
         #     table_name=self.table_name,
         #     sep=","
