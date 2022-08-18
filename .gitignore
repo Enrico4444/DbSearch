@@ -5,7 +5,7 @@
 **/.ipynb_checkpoints/*
 **/__pycache__/
 **/volumes/
-**/env/
-**/*.env
-**/.env
+# **/env/
+# **/*.env
+# **/.env
 TODO
