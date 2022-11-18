@@ -190,12 +190,12 @@ class UserLogout(Resource):
     @jwt_required()
     def post(self):
         storage = ObjectStorage()
-        BLACKLIST = storage.get_json(conf.get("STORAGE_BLACKLIST_PATH"))
+        BLACKLIST = storage.get_json(conf.get("MINIO_BLACKLIST_PATH"))
         jti = get_jwt()["jti"]  # jti is "JWT ID", a unique identifier for a JWT.
         if jti not in BLACKLIST:
             logger.info("adding jti to blacklist")
             BLACKLIST.append(jti)
-            storage.put_json(BLACKLIST, conf.get("STORAGE_BLACKLIST_PATH"))
+            storage.put_json(BLACKLIST, conf.get("MINIO_BLACKLIST_PATH"))
             return {"message": "Successfully logged out"}, 200 
         logger.info("jti already in blacklist")
         

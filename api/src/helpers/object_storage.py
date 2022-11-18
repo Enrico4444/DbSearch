@@ -36,17 +36,17 @@ class ObjectStorage():
 
     def __init__(self):
         self.client = self.storage_connection()
-        self.bucket = conf.get("STORAGE_BUCKET")
+        self.bucket = conf.get("MINIO_BUCKET")
         self.make_bucket_if_not_exists()
 
     @staticmethod
     def storage_connection():
         # general storage connection; replace content if replacing storage
         storage_credentials = {
-            "access_key": conf.get("STORAGE_ACCESS_KEY"),
-            "secret_key": conf.get("STORAGE_SECRET_KEY")
+            "access_key": conf.get("MINIO_USER"),
+            "secret_key": conf.get("MINIO_PASSWORD")
         }
-        storage_url = f'{conf.get("STORAGE_LOCAL_HOST")}:{conf.get("STORAGE_LOCAL_PORT")}'
+        storage_url = f'{conf.get("MINIO_HOST")}:{conf.get("MINIO_PORT")}'
         try:
             minio = Minio(
                 storage_url,

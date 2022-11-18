@@ -12,7 +12,7 @@ conf = get_conf()
 
 def assign_permissions(role_name, permissions, permission_action="append"):
     storage = ObjectStorage()
-    PERMISSIONS = storage.get_json(conf.get("STORAGE_PERMISSIONS_PATH"))
+    PERMISSIONS = storage.get_json(conf.get("MINIO_PERMISSIONS_PATH"))
     # if new role: add role and permissions; if existing role and action=replace: replace existing permissions
     if role_name not in PERMISSIONS or permission_action == "replace":
         PERMISSIONS[role_name] = permissions
@@ -26,7 +26,7 @@ def assign_permissions(role_name, permissions, permission_action="append"):
             else:
                 PERMISSIONS[role_name][resource_name] = permissions[resource_name]
     print(PERMISSIONS)
-    storage.put_json(PERMISSIONS, conf.get("STORAGE_PERMISSIONS_PATH"))
+    storage.put_json(PERMISSIONS, conf.get("MINIO_PERMISSIONS_PATH"))
 
 def create_role_and_user(role_name, permissions, username=None, password=None):
     role = RoleModel.find_by(name=role_name)
@@ -51,7 +51,7 @@ def get_permissions(user_id):
     if user_data and "role.name" in user_data[0]:
         role_name = user_data[0]["role.name"]
         storage = ObjectStorage()
-        PERMISSIONS = storage.get_json(conf.get("STORAGE_PERMISSIONS_PATH"))
+        PERMISSIONS = storage.get_json(conf.get("MINIO_PERMISSIONS_PATH"))
         if role_name in PERMISSIONS:
             return PERMISSIONS[role_name]
 

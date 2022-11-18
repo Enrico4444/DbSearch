@@ -1,0 +1,33 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgresdb
+spec:
+  ports:
+    -
+      name: postgresdb
+      protocol: TCP
+      port: 5434
+      targetPort: 5434
+      nodePort: 0
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: postgresdb
+subsets:
+  -
+    addresses:
+      -
+        ip: "165.225.202.123"
+    ports:
+      -
+        port: 5434
+        name: minio
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: postgresdb # this name can be used internally by the application to refer to postgre's URL
+# spec: 
+#   type: ExternalName # https://medium.com/@ManagedKube/kubernetes-access-external-services-e4fd643e5097
+#   externalName: localhost:5434 # 10.0.2.2
